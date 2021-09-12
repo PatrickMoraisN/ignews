@@ -3,7 +3,15 @@ import { SubscribeButton } from '../components/SubscribeButton';
 import { GetServerSideProps } from 'next';
 import styles from './home.module.scss'
 import { stripe } from '../services/stripe';
-export default function Home() {
+
+interface HomeProps {
+  product: {
+    priceId: string;
+    amount: number;
+  }
+}
+
+export default function Home({ product }: HomeProps) {
   return (
     <h1>
       <Head>
@@ -14,7 +22,7 @@ export default function Home() {
           <span>Hey, welcome</span>
           <h1>News about <br />the <span>React</span> world.</h1>
           <p>Get acces to all publications <br />
-            <span>for $9.90 month.</span>
+            <span>for {product.amount} month.</span>
           </p>
           <SubscribeButton />
         </section>
