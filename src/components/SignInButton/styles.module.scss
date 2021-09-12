@@ -23,4 +23,8 @@
   &:hover {
     filter: brightness(0.8);
   }
+
+  svg:nth-child(2) {
+    margin-left: 1rem;
+  }
 }
