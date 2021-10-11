@@ -1,55 +1,64 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { Readable } from 'stream';
+import { Readable } from "stream";
 import Stripe from "stripe";
 import { stripe } from "../../services/stripe";
 
-async function buffer(readable:Readable) {
+async function buffer(readable: Readable) {
   const chunks = [];
 
   for await (const chunk of readable) {
-    chunks.push(
-      typeof chunk === 'string' ? Buffer.from(chunk) : chunk
-    );
+    chunks.push(typeof chunk === "string" ? Buffer.from(chunk) : chunk);
   }
-  return Buffer.concat(chunks)
+  return Buffer.concat(chunks);
 }
 
 export const config = {
   // Por padrao o Next entende que a requisicao vem como um JSON, mas nesse caso vem como um Readable(stream)
   // Entao temos que desabilitar o `entendimento padrao` do Next.
   api: {
-    bodyParser: false
-  }
+    bodyParser: false,
+  },
 };
 
-const relevantEvents = new Set([
-  'checkout.session.completed'
-])
+const relevantEvents = new Set(["checkout.session.completed"]);
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
-  if(req.method === 'POST') {
-    const buff = await buffer(req)
+  if (req.method === "POST") {
+    const buff = await buffer(req);
     // Chave que vem por requisicao do stripe
-    const secret = req.headers['stripe-signature'];
+    const secret = req.headers["stripe-signature"];
 
     let event: Stripe.Event;
 
     try {
-      event = stripe.webhooks.constructEvent(buff, secret, process.env.STRIPE_WEBHOOK)
+      event = stripe.webhooks.constructEvent(
+        buff,
+        secret,
+        process.env.STRIPE_WEBHOOK
+      );
     } catch (err) {
-      return res.status(400).send("Webhook error " + err.message)
+      return res.status(400).send("Webhook error " + err.message);
     }
 
     // Checar o tipo de eventos, sessao completada...
     const { type } = event;
 
     if (relevantEvents.has(type)) {
-      console.log('evento recebido ' + event)
+      try {
+        switch (type) {
+          case "checkout.session.completed":
+            break;
+          default:
+            throw new Error("Unhandled event");
+        }
+      } catch (err) {
+        return res.json({ error: "Webhook handler failed." });
+      }
     }
 
-    res.json({ received: true});
+    res.json({ received: true });
   } else {
-    res.setHeader('Allow', 'POST');
-    res.status(405).end('Method not allowed!');
+    res.setHeader("Allow", "POST");
+    res.status(405).end("Method not allowed!");
   }
-}
+};
