@@ -17,7 +17,6 @@ interface PostsProps {
   posts: Post[],
 }
 export default function Posts({ posts }: PostsProps) {
-  console.log(posts)
   return(
     <>
       <Head>
@@ -29,6 +28,7 @@ export default function Posts({ posts }: PostsProps) {
           { posts.map(post => (
             <Link href={`/posts/${post.slug}`}>
               <a key={post.slug}>
+                {console.log(post.slug)}
                 <time>{post.updatedAt}</time>
                 <strong>{post.title}</strong>
                 <p>{post.excerpt}</p>
