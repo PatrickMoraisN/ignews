@@ -25,7 +25,7 @@ export default function Posts({ posts }: PostsProps) {
       </Head>
 
       <main className={styles.container}>
-        <div className={styles.postList}>
+        <div className={styles.posts}>
           { posts.map(post => (
             <Link href={`/posts/${post.slug}`}>
               <a key={post.slug}>
